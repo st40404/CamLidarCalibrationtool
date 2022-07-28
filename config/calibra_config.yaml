@@ -8,10 +8,10 @@ scan_topic_name: "/scan"
 img_topic_name: "/camera/color/image_raw"
 
 # tag info
-tag_type: 2 # 1: kalibr_tag, 2: apriltag
+tag_type: 1 # 1: kalibr_tag, 2: apriltag
 tag_size: 0.088 # tag size, unit meter
 tag_spacing: 0.3 # tag spacing, only used in kalibr_tag. For details, please see kalibr tag description.
-black_border: 1 # if you use kalibr_tag black_boarder = 2; if you use apriltag black_boarder = 1
+black_border: 2 # if you use kalibr_tag black_boarder = 2; if you use apriltag black_boarder = 1
  
 #camera calibration 
 model_type: PINHOLE

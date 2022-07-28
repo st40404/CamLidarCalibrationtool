@@ -7,6 +7,8 @@ void CamPoseEst::FindTargetCorner(cv::Mat &img_raw,
                       std::vector<cv::Point2f> &p2ds)
 {
   // 不同 TAG 类型，使用不同姿态求解
+  // CalBoardInfo_.pt_ is value of tag_type from your calibra_config.yaml
+  // KALIBR_TAG_PATTERN is 1, APRIL_TAG_ONE is 2, CHESS is 3
   if (CHESS == CalBoardInfo_.pt_)
   {
     // std::cout << "CHESSBOARD\n";
@@ -49,11 +51,11 @@ void CamPoseEst::FindTargetCorner(cv::Mat &img_raw,
   {
     const int april_rows = CalBoardInfo_.rows_;      // 6
     const int april_cols = CalBoardInfo_.cols_;      // 6
-    const double tag_sz = CalBoardInfo_.tagSize_;    // 0.055
+    const double tag_sz = CalBoardInfo_.tagSize_;    // 0.088
     const double tag_spacing = CalBoardInfo_.tagSpacing_;    // 0.3
-    const double tag_spacing_sz = tag_sz * (1.+tag_spacing); // 0.055 + 0.0165
+    const double tag_spacing_sz = tag_sz * (1.+tag_spacing); // 0.088 + 0.0264
 
-    std::cout <<"tag size: "<< tag_sz <<" tag space: "<< tag_spacing  << std::endl;
+    std::cout <<"tag size: "<< tag_sz <<" tag space: "<< tag_spacing << std::endl;
     AprilTags::TagCodes tagCodes(AprilTags::tagCodes36h11);
     AprilTags::TagDetector detector(tagCodes, CalBoardInfo_.black_border_);
 
@@ -93,6 +95,8 @@ void CamPoseEst::FindTargetCorner(cv::Mat &img_raw,
       for (auto &tag : detections)
       {
           // debug show corners with window size
+          // this loop is going to get all tag's corner
+          // get two of the digonal corner points, and draw the rectangle based on this two points
           {
               for (int i = 0; i < 4; ++i) {
                   cv::Point2f cor1(tag.p[i].first - window_size,tag.p[i].second-window_size);
@@ -147,7 +151,6 @@ void CamPoseEst::FindTargetCorner(cv::Mat &img_raw,
       AprilTags::TagDetector detector(tagCodes, CalBoardInfo_.black_border_);
 
       std::vector<AprilTags::TagDetection> detections = detector.extractTags(img_raw);
-
       if(detections.size() > 0)
       {
           if(detections.size() > 1)
@@ -276,9 +279,12 @@ bool CamPoseEst::calcCamPose(const double &timestamps, const cv::Mat &image,
     cv::cvtColor(img_raw, img_raw, CV_BGR2GRAY);
   }
 
+  // p3ds is 3D coordinate, p2ds is 2D coordinate
   std::vector<cv::Point3f> p3ds;
   std::vector<cv::Point2f> p2ds;
+
   // FindTargetCorner(img_raw, CHESS, p3ds, p2ds);
+  // get check board four corner in p3ds and p2ds
   FindTargetCorner(img_raw, p3ds, p2ds);
 
   std::vector<cv::Point2f> un_pts;

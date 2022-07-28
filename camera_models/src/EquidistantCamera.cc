@@ -458,6 +458,7 @@ void EquidistantCamera::initUndistortMap(cv::Mat &map1, cv::Mat &map2,
   cv::convertMaps(mapX, mapY, map1, map2, CV_32FC1, false);
 }
 
+// init undistort rectify map
 cv::Mat EquidistantCamera::initUndistortRectifyMap(cv::Mat &map1, cv::Mat &map2,
                                                    float fx, float fy,
                                                    cv::Size imageSize, float cx,

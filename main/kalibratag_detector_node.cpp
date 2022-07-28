@@ -132,10 +132,12 @@ void kalibraTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg) {
   if (cameraptr_ != nullptr)
   {
     // 直接传原始图像，也可以检测二维码。里面会对坐标去畸变再计算 pose.
+    // send original vision
     cv::Mat rectified = cv_ptr->image.clone();
 //    cv::remap(cv_ptr->image, rectified, undist_map1_, undist_map2_, CV_INTER_LINEAR);
 //      cv::imshow("rect",rectified);
 //      cv::waitKey(1);
+
     camposecal_.calcCamPose(cv_ptr->header.stamp.toSec(), rectified, cameraptr_, Twc);
   }
   else{
@@ -143,8 +145,11 @@ void kalibraTagDetector::imageCb(const sensor_msgs::ImageConstPtr& msg) {
   }
 }
 
+
 bool kalibraTagDetector::detect(const sensor_msgs::ImageConstPtr& msg, CamPose& T){
   cv_bridge::CvImagePtr cv_ptr;
+
+  // try to convert image from ROS to OpenCV
   try {
     cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
   }
@@ -152,8 +157,7 @@ bool kalibraTagDetector::detect(const sensor_msgs::ImageConstPtr& msg, CamPose& 
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return false;
   }
-
-  
+ 
   Eigen::Matrix4d Twc;
   if (cameraptr_ != nullptr)
   {
@@ -201,19 +205,25 @@ int main(int argc, char **argv){
   std::vector < CamPose > tagpose;
   int i = 0;
     std::string file = savePath + "apriltag_pose.txt";
+    // std::ofstream is use to write data in txt
     std::ofstream fC(file.c_str());
     fC.close();
     std::ofstream foutC(file.c_str(), std::ios::app);
     foutC.setf(std::ios::fixed, std::ios::floatfield);
     foutC.precision(9);
+
+
+    // this loop will get the bag record and save the camera data
     for (rosbag::MessageInstance const m: views)
     {
       if (m.getTopic() == img_topic_name)
       {
         sensor_msgs::ImageConstPtr img = m.instantiate<sensor_msgs::Image>();
         CamPose Twc;
+
         if(detector.detect(img, Twc))
         {
+
             tagpose.push_back(Twc);
 
             EulerAngles rpy =  ToEulerAngles(Twc.qwc);
