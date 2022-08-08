@@ -39,7 +39,7 @@ namespace sc
 
             co_sine_map (i, 0) = cos (scan_in->angle_min + (double) i * scan_in->angle_increment);
             co_sine_map (i, 1) = sin (scan_in->angle_min + (double) i * scan_in->angle_increment);
-        }
+        } 
 
         output = ranges * co_sine_map;
 
